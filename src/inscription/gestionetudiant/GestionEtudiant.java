@@ -13,6 +13,7 @@ public class GestionEtudiant {
             List<Etudiant> etudiants = new ArrayList<>();
             List<Matiere> matieres = new ArrayList<>();
             System.out.println(); 
+            
             // Ajouter des matières
             System.out.println("Combien de matieres ?");
             int nbMatieres = scanner.nextInt();
@@ -23,13 +24,14 @@ public class GestionEtudiant {
                 matieres.add(new Matiere(nomMatiere));
             }
             System.out.println(); 
+            
             // Ajouter les étudiants
             System.out.println("Combien d'etudiants ?");
             int nbEtudiants = scanner.nextInt();
             scanner.nextLine();
             System.out.println(); 
             for (int i = 0; i < nbEtudiants; i++) {
-                System.out.println("Etudiant -" + (i + 1));
+                System.out.println("Etudiant " + (i + 1));
                 System.out.print("Nom: ");
                 String nom = scanner.nextLine();
                 System.out.print("Prenom: ");
@@ -42,9 +44,24 @@ public class GestionEtudiant {
 
                 Etudiant etudiant = new Etudiant(nom, prenom, age, matricule);
                 List<Double> notes = new ArrayList<>();
+                
+                // Ajouter les notes pour chaque matière
                 for (Matiere matiere : matieres) {
-                    System.out.print("Note En " + matiere.getNom() + ": ");
-                    notes.add(scanner.nextDouble());
+                    double note = -1;
+                    // Boucle pour valider la note
+                    while (note < 0 || note > 20) {
+                        System.out.print("Note en " + matiere.getNom() + " (entre 0 et 20): ");
+                        if (scanner.hasNextDouble()) {
+                            note = scanner.nextDouble();
+                            if (note < 0 || note > 20) {
+                                System.out.println("Note invalide. Veuillez entrer une note entre 0 et 20.");
+                            }
+                        } else {
+                            System.out.println("Entrée invalide. Veuillez entrer un nombre.");
+                            scanner.next(); // Consommer l'entrée incorrecte
+                        }
+                    }
+                    notes.add(note);
                 }
                 scanner.nextLine(); // Consommer le retour à la ligne
                 System.out.println(); 
@@ -53,23 +70,38 @@ public class GestionEtudiant {
             }
             System.out.println(); 
             System.out.println(); 
+            
             int choix;
             do {
                 System.out.println("\n--- Menu ---");
                 System.out.println("1. Affichage des resultats par ordre de merite");
                 System.out.println("2. Afficher le premier et le dernier de la classe");
                 System.out.println("3. afficher la moyenne de la classe");
-                System.out.println("4. Afficher la liste des admis (moyenne >= 10)");
+                System.out.println("4. Afficher les admis (moyenne >= 10)");
                 System.out.println("5. Afficher les Etudiants ayant une moyenne >= moyenne de la classe");
                 System.out.println("0. Quitter");
-                System.out.print("Veuillez entrer votre choix: ");
-                choix = scanner.nextInt();
-                scanner.nextLine(); // Consommer le retour à la ligne
+
+                // Vérification de la saisie du choix du menu
+                while (true) {
+                    System.out.print("Veuillez entrer votre choix: ");
+                    if (scanner.hasNextInt()) {
+                        choix = scanner.nextInt();
+                        scanner.nextLine(); // Consommer le retour à la ligne
+                        if (choix >= 0 && choix <= 5) {
+                            break; // Sortir de la boucle si le choix est valide
+                        } else {
+                            System.out.println("Choix invalide. Veuillez entrer un nombre entre 0 et 5.");
+                        }
+                    } else {
+                        System.out.println("Entrée invalide. Veuillez entrer un nombre.");
+                        scanner.next(); // Consommer l'entrée incorrecte
+                    }
+                }
 
                 switch (choix) {
                     case 1:
-                         System.out.println(); 
-                         System.out.println(); 
+                        System.out.println(); 
+                        System.out.println(); 
                         etudiants.sort((e1, e2) -> Double.compare(e2.calculerMoyenne(), e1.calculerMoyenne()));
                         System.out.println("Resultats par ordre de merite:");
                         for (Etudiant e : etudiants) {
@@ -109,12 +141,10 @@ public class GestionEtudiant {
                                 .mapToDouble(Etudiant::calculerMoyenne)
                                 .average()
                                 .orElse(0.0);
-                        System.out.println("Etudiants ayant une moyenne >= moyenne de la classe est :");
+                        System.out.println("Etudiants ayant une moyenne >= moyenne de la classe :");
                         etudiants.stream()
                                 .filter(e -> e.calculerMoyenne() >= moyenne)
                                 .forEach(e -> System.out.println(e.getNomComplet()));
-                               
-                              
                         break;
                     case 0:
                         System.out.println(); 
